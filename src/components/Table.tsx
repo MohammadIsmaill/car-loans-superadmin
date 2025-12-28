@@ -16,7 +16,7 @@ interface TableProps<T> {
   onSort?: (column: string) => void;
 }
 
-export default function Table<T extends { id?: string | number }>({
+export default function Table<T extends { id?: string | number; _id?: string | number }>({
   columns,
   data,
   onRowClick,
@@ -65,7 +65,7 @@ export default function Table<T extends { id?: string | number }>({
         <tbody>
           {data.map((item, index) => (
             <tr
-              key={item.id || index}
+              key={item.id || item._id || index}
               className={`border-b border-gray-100 ${
                 onRowClick ? 'cursor-pointer hover:bg-gray-50' : ''
               }`}

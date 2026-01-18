@@ -414,24 +414,44 @@ export interface BankLoan {
     name: string;
     email?: string;
     phone: string;
+    nationalId?: string;
   };
   vehicle: {
     _id: string;
     make: string;
     model: string;
     year: number;
+    vin?: string;
+    mileage?: number;
+    exteriorColor?: string;
+    pricing?: {
+      listPrice?: number;
+      salePrice?: number;
+    };
   };
   bank: {
     _id: string;
     name: string;
+    code?: string;
   };
-  loanAmount: number;
+  dealership?: {
+    _id: string;
+    name: string;
+  };
+  loanAmount?: number;
   downPayment?: number;
   interestRate?: number;
   tenure?: number;
   monthlyPayment?: number;
-  status: 'pending' | 'approved' | 'rejected' | 'closed';
+  status: 'pending' | 'approved' | 'rejected' | 'closed' | 'cancelled';
   currentPhaseType?: string;
+  phases?: Array<{
+    type: string;
+    status: string;
+    startedAt?: string;
+    completedAt?: string;
+    data?: any;
+  }>;
   applicationDate: string;
   approvalDate?: string;
   createdAt: string;

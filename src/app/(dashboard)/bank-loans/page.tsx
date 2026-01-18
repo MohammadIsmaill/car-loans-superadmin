@@ -87,6 +87,51 @@ export default function BankLoans() {
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
 
+  // Helper to extract loan amount from phases if not directly available
+  const getLoanAmount = (loan: BankLoan): number | null => {
+    if (loan.loanAmount) return loan.loanAmount;
+
+    // Try to get from bank_offers phase
+    const bankOffersPhase = loan.phases?.find((p: any) => p.type === 'bank_offers');
+    if (bankOffersPhase?.data?.selectedOffer?.totalAmount) {
+      return bankOffersPhase.data.selectedOffer.totalAmount;
+    }
+
+    // Try to get from pricing phase
+    const pricingPhase = loan.phases?.find((p: any) => p.type === 'dealership_pricing');
+    if (pricingPhase?.data?.salePrice) {
+      return pricingPhase.data.salePrice;
+    }
+
+    return null;
+  };
+
+  // Helper to extract customer name from phases if not directly available
+  const getCustomerName = (loan: BankLoan): string => {
+    if (loan.customer?.name) return loan.customer.name;
+
+    // Try to get from client_personal_info phase
+    const personalInfoPhase = loan.phases?.find((p: any) => p.type === 'client_personal_info');
+    if (personalInfoPhase?.data?.name) {
+      return personalInfoPhase.data.name;
+    }
+
+    return 'Unknown';
+  };
+
+  // Helper to extract dealership name from phases if not directly available
+  const getDealershipName = (loan: BankLoan): string => {
+    if (loan.dealership?.name) return loan.dealership.name;
+
+    // Try to get from dealership_selection phase
+    const dealershipPhase = loan.phases?.find((p: any) => p.type === 'dealership_selection');
+    if (dealershipPhase?.data?.dealership?.name) {
+      return dealershipPhase.data.dealership.name;
+    }
+
+    return '';
+  };
+
   return (
     <>
       <DashboardHeader title="Bank Loans" />
@@ -144,7 +189,10 @@ export default function BankLoans() {
                     {loan.vehicle?.year} {loan.vehicle?.make} {loan.vehicle?.model}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    Amount: ${loan.loanAmount?.toLocaleString() || '-'}
+                    {(() => {
+                      const amount = getLoanAmount(loan);
+                      return amount ? `Amount: SAR ${amount.toLocaleString()}` : '';
+                    })()}
                     {loan.tenure && <span className="mx-2">•</span>}
                     {loan.tenure && `${loan.tenure} months`}
                     {loan.interestRate && <span className="mx-2">•</span>}
@@ -156,8 +204,14 @@ export default function BankLoans() {
                 <div className="flex items-center gap-8">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
-                    <span className="text-sm font-medium">{loan.customer?.name || 'Unknown'}</span>
+                    <span className="text-sm font-medium">{getCustomerName(loan)}</span>
                   </div>
+                  {getDealershipName(loan) && (
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+                      <span className="text-sm font-medium">{getDealershipName(loan)}</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
                     <span className="text-sm font-medium">{loan.bank?.name || 'Unknown Bank'}</span>
